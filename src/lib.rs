@@ -21,9 +21,6 @@
 
 pub mod chars_shift;
 pub mod config_params;
-#[cfg(not(target_arch = "wasm32"))]
-pub mod eth;
-#[cfg(not(target_arch = "wasm32"))]
 pub mod helpers;
 /// Regex verification + SHA256 computation.
 pub mod regex_sha2;
@@ -33,14 +30,11 @@ pub mod regex_sha2_base64;
 pub mod sign_verify;
 /// Util functions.
 pub mod utils;
-#[cfg(target_arch = "wasm32")]
-pub mod wasm;
 pub mod wtns_commit;
 use std::fs::File;
 use std::marker::PhantomData;
 
 use crate::chars_shift::CharsShiftConfig;
-#[cfg(not(target_arch = "wasm32"))]
 pub use crate::helpers::*;
 use crate::regex_sha2::RegexSha2Config;
 use crate::sign_verify::*;
@@ -48,7 +42,6 @@ use crate::utils::*;
 use crate::wtns_commit::poseidon_circuit::*;
 use crate::wtns_commit::*;
 use cfdkim::canonicalize_signed_email;
-#[cfg(not(target_arch = "wasm32"))]
 use cfdkim::resolve_public_key;
 pub use config_params::*;
 use halo2_base::halo2_proofs::circuit;
@@ -80,7 +73,6 @@ use num_bigint::BigUint;
 use regex_sha2_base64::RegexSha2Base64Config;
 use rsa::traits::PublicKeyParts;
 use sha2::{Digest, Sha256};
-#[cfg(not(target_arch = "wasm32"))]
 use snark_verifier::loader::LoadedScalar;
 use snark_verifier_sdk::CircuitExt;
 use std::io::{Read, Write};
@@ -242,10 +234,7 @@ impl<F: PrimeField> Circuit<F> for DefaultEmailVerifyCircuit<F> {
     }
 
     fn configure(meta: &mut ConstraintSystem<F>) -> Self::Config {
-        #[cfg(not(target_arch = "wasm32"))]
         let config = Self::configure_native(meta);
-        #[cfg(target_arch = "wasm32")]
-        let config = wasm::configure_wasm(meta);
         config
     }
 
@@ -388,7 +377,6 @@ impl<F: PrimeField> DefaultEmailVerifyCircuit<F> {
     ///
     /// # Return values
     /// Return a new [`DefaultEmailVerifyCircuit`].
-    #[cfg(not(target_arch = "wasm32"))]
     pub async fn gen_circuit_from_email_path(email_path: &str) -> Self {
         let email_bytes = {
             let mut f = File::open(email_path).unwrap();
@@ -435,7 +423,6 @@ impl<F: PrimeField> DefaultEmailVerifyCircuit<F> {
         DefaultEmailVerifyPublicInput::new(sign_commit, public_key_hash, header_substrs, body_substrs)
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
     fn configure_native(meta: &mut ConstraintSystem<F>) -> DefaultEmailVerifyConfig<F> {
         let params = default_config_params();
         let range_config = RangeConfig::configure(
@@ -524,7 +511,6 @@ impl<F: PrimeField> DefaultEmailVerifyCircuit<F> {
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 #[cfg(test)]
 mod test {
     use super::*;

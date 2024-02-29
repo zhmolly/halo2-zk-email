@@ -110,7 +110,6 @@ impl<F: PrimeField> RegexSha2Config<F> {
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 #[cfg(test)]
 mod test {
     use cfdkim::canonicalize_signed_email;

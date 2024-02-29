@@ -1,25 +1,16 @@
+use crate::{DefaultEmailVerifyCircuit, RegexSha2Base64Config, RegexSha2Config, SignVerifyConfig};
 use halo2_base::gates::{flex_gate::FlexGateConfig, range::RangeConfig};
 use halo2_dynamic_sha256::*;
 use halo2_regex::defs::{AllstrRegexDef, RegexDefs, SubstrRegexDef};
-use std::fs::File;
-// use regex_sha2_base64::RegexSha2Base64Config;
-use crate::{DefaultEmailVerifyCircuit, RegexSha2Base64Config, RegexSha2Config, SignVerifyConfig};
 use once_cell::sync::OnceCell;
+use std::fs::File;
 
 #[cfg(not(test))]
 pub fn default_config_params() -> EmailVerifyConfigParams {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        if GLOBAL_CONFIG_PARAMS.get().is_none() {
-            EmailVerifyConfigParams::set_from_env();
-        }
-        EmailVerifyConfigParams::global().clone()
+    if GLOBAL_CONFIG_PARAMS.get().is_none() {
+        EmailVerifyConfigParams::set_from_env();
     }
-    #[cfg(target_arch = "wasm32")]
-    {
-        // wasm::get_config_params_wasm()
-        EmailVerifyConfigParams::global().clone()
-    }
+    EmailVerifyConfigParams::global().clone()
 }
 
 #[cfg(test)]
@@ -31,13 +22,6 @@ pub fn default_config_params() -> &'static EmailVerifyConfigParams {
 }
 
 pub static GLOBAL_CONFIG_PARAMS: OnceCell<EmailVerifyConfigParams> = OnceCell::new();
-#[cfg(target_arch = "wasm32")]
-pub static GLOBAL_BODYHASH_DEFS_AND_ID: OnceCell<(RegexDefs, usize)> = OnceCell::new();
-#[cfg(target_arch = "wasm32")]
-pub static GLOBAL_HEADER_DEFS: OnceCell<Vec<RegexDefs>> = OnceCell::new();
-#[cfg(target_arch = "wasm32")]
-pub static GLOBAL_BODY_DEFS: OnceCell<Vec<RegexDefs>> = OnceCell::new();
-
 
 /// The name of env variable for the path to the email configuration json.
 pub const EMAIL_VERIFY_CONFIG_ENV: &'static str = "EMAIL_VERIFY_CONFIG";

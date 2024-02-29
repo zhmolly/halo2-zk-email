@@ -1,39 +1,14 @@
-use base64::prelude::{Engine as _, BASE64_STANDARD};
 use cfdkim::*;
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use fancy_regex::Regex;
-use halo2_base::halo2_proofs;
-use halo2_base::halo2_proofs::circuit::SimpleFloorPlanner;
-use halo2_base::halo2_proofs::halo2curves::bn256::{Bn256, Fr, G1Affine};
-use halo2_base::halo2_proofs::plonk::{create_proof, keygen_pk, keygen_vk, verify_proof, Circuit, ConstraintSystem};
-use halo2_base::halo2_proofs::poly::kzg::commitment::KZGCommitmentScheme;
-use halo2_base::halo2_proofs::poly::kzg::multiopen::{ProverGWC, VerifierGWC};
-use halo2_base::halo2_proofs::poly::kzg::strategy::SingleStrategy;
-use halo2_base::halo2_proofs::poly::{
-    commitment::{Params, ParamsProver, ParamsVerifier},
-    kzg::commitment::ParamsKZG,
-};
-use halo2_base::halo2_proofs::transcript::{Blake2bRead, Blake2bWrite, Challenge255, TranscriptReadBuffer, TranscriptWriterBuffer};
-use halo2_base::halo2_proofs::{circuit::Layouter, plonk::Error, SerdeFormat};
-use halo2_base::halo2_proofs::{
-    circuit::{floor_planner::V1, Cell, Value},
-    dev::{CircuitCost, FailureLocation, MockProver, VerifyFailure},
-    plonk::{Any, Column, Instance, ProvingKey, VerifyingKey},
-};
-use halo2_base::{gates::range::RangeConfig, utils::PrimeField, Context};
-use halo2_base::{gates::range::RangeStrategy::Vertical, SKIP_FIRST_PASS};
-use halo2_regex::defs::{AllstrRegexDef, SubstrRegexDef};
+use criterion::{criterion_group, criterion_main, Criterion};
+use halo2_base::halo2_proofs::dev::MockProver;
+use halo2_base::halo2_proofs::halo2curves::bn256::Bn256;
+use halo2_base::halo2_proofs::plonk::{keygen_pk, keygen_vk};
+use halo2_base::halo2_proofs::poly::{commitment::Params, kzg::commitment::ParamsKZG};
+use halo2_base::utils::PrimeField;
 use halo2_regex::vrm::DecomposedRegexConfig;
-use halo2_rsa::{RSAPubE, RSAPublicKey, RSASignature};
 use halo2_zk_email::{default_config_params, DefaultEmailVerifyCircuit, EMAIL_VERIFY_CONFIG_ENV};
-use itertools::Itertools;
-use mailparse::parse_mail;
 use num_bigint::BigUint;
 use rand::rngs::OsRng;
-use rand::thread_rng;
-use rand::Rng;
-use rsa::{PublicKeyParts, RsaPrivateKey};
-use sha2::{self, Digest, Sha256};
 use snark_verifier_sdk::halo2::{gen_proof, gen_proof_shplonk};
 use snark_verifier_sdk::CircuitExt;
 use std::env::set_var;
